@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="">
+    {% for blogger in bloggers %}
+        <div class="row">
+            <div class="col">
+                <h3 style="text-align: center"><a href="/blog/{{ blogger.id }}">{{ blogger.username }}</a></h3>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

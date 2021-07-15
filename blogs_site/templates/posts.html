@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <ul class="posts clearfix">
+    {% for post in posts %}
+	<li class="post-wrapper">
+		<a href="/post/{{post.id}}" class="post">
+            <h1 style="text-align: center;">{{ post.headline }}</h1>
+		</a>
+	</li>
+	{% endfor %}
+  </ul>
+
+{% endblock %}
