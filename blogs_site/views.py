@@ -4,11 +4,14 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import Http404
 from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+
 
 # Create your views here.
 from django.views import View
-from django.views.generic import TemplateView, CreateView, FormView
+from django.views.generic import TemplateView, CreateView, FormView, UpdateView
 
+from blogs.settings import DEFAULT_FROM_EMAIL
 from blogs_site.models import Post, Blogger
 
 
@@ -63,6 +66,7 @@ class BlogView(FormView):
         ctx = dict()
 
         ctx['posts'] = Post.objects.filter(blogger=kwargs['blogger_id'])
+        ctx['blogger'] = Blogger.objects.get(id=kwargs['blogger_id'])
 
         if request.user.is_authenticated and \
                 request.user.subscriptions is not None and \
@@ -115,13 +119,19 @@ class PostsView(TemplateView):
 
 
 class PostView(TemplateView):
-    template_name = ''
+    template_name = 'post.html'
+
+    def get(self, request, *args, **kwargs):
+        ctx = dict()
+
+        ctx['post'] = Post.objects.get(id=kwargs['post_id'])
+        return render(request, PostView.template_name, ctx)
 
 
 class CreatePostView(CreateView):
     model = Post
     fields = ['headline', 'text']
-    template_name = 'create_post.html'
+    template_name = 'create_update_post.html'
     success_url = '/'
 
     def get(self, request, *args, **kwargs):
@@ -134,4 +144,40 @@ class CreatePostView(CreateView):
         self.object.blogger = self.request.user
         self.object.create_date = datetime.now()
         self.object.save()
+
+        bloggers = Blogger.objects.all()
+        subs = [i for i in bloggers if self.request.user.id in i.subscriptions]
+        print(subs)
+        emails = [sub.email for sub in subs]
+        print(emails)
+        send_mail('Здравствуйте', f'Вышел новый пост от {self.object.blogger}'
+                                  f' с заголовком {self.object.headline}'
+                                  f'\n\n\nС уважением,\nКоманда BlogTop',
+                  DEFAULT_FROM_EMAIL,
+                  emails)
+
         return super().form_valid(form)
+
+
+class UpdatePostView(UpdateView):
+    model = Post
+    fields = ['headline', 'text']
+    template_name = 'create_update_post.html'
+    success_url = '/'
+
+    def get(self, request, *args, **kwargs):
+        ctx = dict()
+        post = Post.objects.get(id=kwargs['post_id'])
+
+        ctx['post'] = post
+
+        if request.user.is_authenticated and post.blogger == request.user:
+            return render(request, UpdatePostView.template_name, ctx)
+        raise Http404()
+
+    def form_valid(self, form):
+        post = Post.objects.get(id=self.kwargs['post_id'])
+        post.headline = form.cleaned_data['headline']
+        post.text = form.cleaned_data['text']
+        post.save()
+        return self.form_valid(form)

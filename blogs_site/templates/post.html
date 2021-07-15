@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>{{ post.headline }}</h1>
+<p>{{ post.text }}</p>
+<a href="/blog/{{ post.blogger.id }}">Автор: {{ post.blogger.username }}</a>
+
+{% if post.blogger == user %}
+    <a href="/change_post/{{ post.id }}" type="button" class="btn btn-info">Изменить</a>
+{% endif %}
+{% endblock %}

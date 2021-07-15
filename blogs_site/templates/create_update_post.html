@@ -1,21 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<h1>Создание новости</h1>
 <form action="" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="form-row row">
         <div class="form-group col">
             <label for="id_headline">Загаловок</label>
             <input type="text" class="form-control" name="headline" required
-                   id="id_headline" placeholder="Введите загаловок" value="">
+                   id="id_headline" placeholder="Введите загаловок" value="{{post.headline}}">
         </div>
     </div>
     <div class="form-row row">
         <div class="form-group col">
             <label for="id_text">Текст</label>
             <textarea class="form-control" id="id_text"
-                      rows="5" name="text" placeholder="Введите текст поста" required></textarea>
+                      rows="5" name="text" placeholder="Введите текст поста" required>
+{{ post.text }}</textarea>
         </div>
     </div>
     <div class="row">

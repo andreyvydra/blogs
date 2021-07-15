@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<h1>{{blogger.username}}</h1>
 {% if blog_personal and user.is_authenticated %}
     <a href="/create_post" class="btn btn-secondary">Создать пост</a>
 {% elif user.is_authenticated %}
@@ -23,6 +23,5 @@
 	</li>
 	{% endfor %}
 </ul>
-
 
 {% endblock %}
