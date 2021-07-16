@@ -6,7 +6,7 @@ from django.db import models
 
 
 class Blogger(AbstractUser):
-    subscriptions = ArrayField(models.IntegerField(), null=True)
+    subscriptions = ArrayField(models.IntegerField(), blank=True, null=True)
 
 
 class Post(models.Model):
@@ -15,3 +15,4 @@ class Post(models.Model):
     text = models.TextField()
     create_date = models.DateTimeField()
     blogger = models.ForeignKey(Blogger, on_delete=models.CASCADE)
+    views = ArrayField(models.IntegerField(), blank=True, null=True)

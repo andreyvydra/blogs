@@ -2,14 +2,5 @@
 
 {% block content %}
 <h1>Лента</h1>
-  <ul class="posts clearfix">
-    {% for post in posts %}
-	<li class="post-wrapper">
-		<a href="/post/{{post.id}}" class="post">
-            <h1 style="text-align: center;">{{ post.headline }}</h1>
-		</a>
-	</li>
-	{% endfor %}
-  </ul>
-
+  {% include 'includes/posts_widget.html' %}
 {% endblock %}

@@ -1,0 +1,13 @@
+<ul class="posts clearfix">
+    {% for post in posts %}
+	<li class="post-wrapper">
+		{% if user.id in post.views %}
+		<a href="/post/{{post.id}}" class="post watched">
+		{% else %}
+		<a href="/post/{{post.id}}" class="post">
+		{% endif %}
+            <h1 style="text-align: center;">{{ post.headline }}</h1>
+		</a>
+	</li>
+	{% endfor %}
+</ul>

@@ -85,6 +85,11 @@ class BlogView(FormView):
             request.user.save()
         else:
             request.user.subscriptions.remove(kwargs['blogger_id'])
+            posts = Post.objects.filter(blogger__id=kwargs['blogger_id'])
+            posts = [post for post in posts if request.user.id in post.views]
+            for post in posts:
+                post.views.remove(request.user.id)
+                post.save()
             request.user.save()
         return self.get(request, *args, **kwargs)
 
@@ -123,8 +128,16 @@ class PostView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         ctx = dict()
-
-        ctx['post'] = Post.objects.get(id=kwargs['post_id'])
+        post = Post.objects.get(id=kwargs['post_id'])
+        if post.views is not None and request.user.id not in post.views and\
+                post.blogger != request.user:
+            post.views.append(request.user.id)
+        elif post.views is None and \
+                post.blogger != request.user:
+            post.views = list()
+            post.views.append(request.user.id)
+        post.save()
+        ctx['post'] = post
         return render(request, PostView.template_name, ctx)
 
 
@@ -147,14 +160,8 @@ class CreatePostView(CreateView):
 
         bloggers = Blogger.objects.all()
         subs = [i for i in bloggers if self.request.user.id in i.subscriptions]
-        print(subs)
         emails = [sub.email for sub in subs]
-        print(emails)
-        send_mail('Здравствуйте', f'Вышел новый пост от {self.object.blogger}'
-                                  f' с заголовком {self.object.headline}'
-                                  f'\n\n\nС уважением,\nКоманда BlogTop',
-                  DEFAULT_FROM_EMAIL,
-                  emails)
+        send_message(emails, self.object.blogger, self.object.headline)
 
         return super().form_valid(form)
 
@@ -181,3 +188,11 @@ class UpdatePostView(UpdateView):
         post.text = form.cleaned_data['text']
         post.save()
         return self.form_valid(form)
+
+
+def send_message(emails, blogger, headline):
+    send_mail('Здравствуйте', f'Вышел новый пост от {blogger}'
+                              f' с заголовком {headline}'
+                              f'\n\n\nС уважением,\nКоманда BlogTop',
+              DEFAULT_FROM_EMAIL,
+              emails)
